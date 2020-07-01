@@ -2,7 +2,8 @@
 
 std::ostream& operator<<(std::ostream &out, const EncSet &es) {
     for(int i = 0; i < es.length; ++i){
-        std::cout << es.Get(i) << " ";
+        out << es.Get(i);
+        if( i != es.length - 1) out << " ";
     }
     return out;
 };
@@ -10,6 +11,7 @@ std::ostream& operator<<(std::ostream &out, const EncSet &es) {
 std::ostream& operator<<(std::ostream &out, const IntSet &is) {
     for(int i = 0; i < ENCSET_ENC_NUM; ++i){
         out << is.EncSets[i];
+        if(i != ENCSET_ENC_NUM - 1) out << "\n";
     }
     return out;
 };
@@ -71,14 +73,14 @@ int64_t EncSet::Get(size_t pos) const {
     }
 }
 
-int EncSet::Find(int64_t value){
-    int i;
+int EncSet::LowerBound(int64_t value){
+    int i = 0;
     if(encoding == ENCSET_ENC_INT16) {
-        i = std::lower_bound((int16_t*)content, (int16_t*)content + length, value) - (int16_t*)content;  
+        i = std::lower_bound((int16_t*)content, (int16_t*)content + length, (int16_t)value) - (int16_t*)content;  
     } else if(encoding == ENCSET_ENC_INT32) {
-        i = std::lower_bound((int32_t*)content, (int32_t*)content + length, value) - (int32_t*)content;
+        i = std::lower_bound((int32_t*)content, (int32_t*)content + length, (int32_t)value) - (int32_t*)content;
     } else {
-        i = std::lower_bound((int64_t*)content, (int64_t*)content + length, value) - (int64_t*)content; 
+        i = std::lower_bound((int64_t*)content, (int64_t*)content + length, (int64_t)value) - (int64_t*)content; 
     }
     return i;
 }
@@ -120,7 +122,7 @@ uint8_t IntSet::_ValueEncoding(int64_t v){
 int IntSet::Insert(int64_t v){
 
     auto i = _FindEncSet(_ValueEncoding(v));
-    auto j = EncSets[i].Find(v);
+    auto j = EncSets[i].LowerBound(v);
    
     if(j != EncSets[i].length && EncSets[i].Get(j) == v) return -1;
     
@@ -140,7 +142,7 @@ int IntSet::Insert(int64_t v){
 int IntSet::Remove(int64_t v){
 
     auto i = _FindEncSet(_ValueEncoding(v));
-    auto j = EncSets[i].Find(v);
+    auto j = EncSets[i].LowerBound(v);
     if(j == EncSets[i].length || EncSets[i].Get(j) != v) return -1;
   
     if(j < EncSets[i].length - 1){
@@ -157,7 +159,10 @@ int IntSet::Remove(int64_t v){
 
 int IntSet::Find(int64_t v){
     auto i = _FindEncSet(_ValueEncoding(v));
-    return EncSets[i].Find(v);
+    auto j = EncSets[i].LowerBound(v);
+   
+    if(j != EncSets[i].length && EncSets[i].Get(j) == v) return 1;
+    return -1;
 }
 
 uint64_t IntSet::_Get(size_t pos){

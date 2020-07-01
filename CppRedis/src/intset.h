@@ -14,6 +14,8 @@ const uint8_t ENCSET_ENC_INT32 = sizeof(int32_t);
 const uint8_t ENCSET_ENC_INT64 = sizeof(int64_t);
 const uint8_t ENCSET_ENC_ENCODINGS[] = {ENCSET_ENC_INT16, ENCSET_ENC_INT32, ENCSET_ENC_INT64}; 
 const uint8_t ENCSET_ENC_NUM = sizeof(ENCSET_ENC_ENCODINGS) / sizeof(uint8_t);
+const int FOUND = 1;
+const int NOT_FOUND = -1;
 
 struct EncSet {
     friend std::ostream& operator<<(std::ostream &out, const EncSet &es);
@@ -23,7 +25,7 @@ public:
     void Resize(size_t newlength);
     void Set(size_t i, int64_t value);
     int64_t Get(size_t pos) const;
-    int Find(int64_t value);
+    int LowerBound(int64_t value);
     EncSet();
     ~EncSet();
 
